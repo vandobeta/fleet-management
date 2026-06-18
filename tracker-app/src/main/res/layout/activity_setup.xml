@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0D0D0D"
+    android:padding="24dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TRACKER SMS"
+        android:textColor="#00FF88"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="40dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Setup"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Icon -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📱"
+        android:textSize="60sp"
+        android:gravity="center"
+        android:layout_marginTop="40dp"/>
+
+    <!-- Permission Status -->
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Checking permissions..."
+        android:textColor="#FFA500"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginTop="24dp"/>
+
+    <!-- Phone Input -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tracker Phone Number"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_marginTop="32dp"/>
+
+    <EditText
+        android:id="@+id/phone_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="+256XXXXXXXXX"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#666666"
+        android:background="@drawable/input_bg"
+        android:padding="12dp"
+        android:inputType="phone"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter the phone number of your GPS tracker (e.g., +256700000000)"
+        android:textColor="#666666"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"/>
+
+    <!-- Continue Button -->
+    <Button
+        android:id="@+id/btn_continue"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="CONTINUE"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/btn_bg"
+        android:layout_marginTop="32dp"/>
+
+    <!-- Info -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This app requires SMS permissions to communicate with your GPS tracker."
+        android:textColor="#444444"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginTop="24dp"/>
+
+</LinearLayout>

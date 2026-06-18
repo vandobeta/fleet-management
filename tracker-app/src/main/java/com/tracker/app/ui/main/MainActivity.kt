@@ -3,7 +3,9 @@ package com.tracker.app.ui.main
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -15,16 +17,19 @@ import com.tracker.app.R
 import com.tracker.app.ui.commands.CommandsActivity
 import com.tracker.app.ui.map.MapActivity
 import com.tracker.app.ui.settings.SettingsActivity
+import com.tracker.app.ui.setup.SetupActivity
 import com.tracker.app.utils.SmsManager
-import com.tracker.app.data.model.LocationResponse
-import com.tracker.app.data.model.StatusResponse
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var smsManager: SmsManager
     private lateinit var statusText: TextView
-    private lateinit var locationText: TextView
-    private lateinit var engineStatusText: TextView
+    private lateinit var trackerNumberText: TextView
+    private lateinit var lastUpdateText: TextView
+    private lateinit var statusDot: View
     private lateinit var btnGetLocation: Button
     private lateinit var btnGetStatus: Button
     private lateinit var btnEngineOn: Button
@@ -32,6 +37,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Check if setup is complete
+        val prefs = getSharedPreferences("tracker_prefs", MODE_PRIVATE)
+        if (!prefs.getBoolean("setup_complete", false)) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return
+        }
+        
         setContentView(R.layout.activity_main)
         
         smsManager = SmsManager(this)
@@ -43,8 +57,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViews() {
         statusText = findViewById(R.id.status_text)
-        locationText = findViewById(R.id.location_text)
-        engineStatusText = findViewById(R.id.engine_status_text)
+        trackerNumberText = findViewById(R.id.tracker_number_text)
+        lastUpdateText = findViewById(R.id.last_update_text)
+        statusDot = findViewById(R.id.status_dot)
         
         btnGetLocation = findViewById(R.id.btn_get_location)
         btnGetStatus = findViewById(R.id.btn_get_status)
@@ -55,6 +70,8 @@ class MainActivity : AppCompatActivity() {
         btnGetStatus.setOnClickListener { requestStatus() }
         btnEngineOn.setOnClickListener { engineOn() }
         btnEngineOff.setOnClickListener { engineOff() }
+        
+        findViewById<Button>(R.id.btn_navigate).setOnClickListener { navigateToCar() }
         
         findViewById<Button>(R.id.btn_commands).setOnClickListener {
             startActivity(Intent(this, CommandsActivity::class.java))
@@ -86,12 +103,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadCurrentStatus() {
-        if (smsManager.getTrackerNumber().isEmpty()) {
-            locationText.text = "Configure tracker number in Settings"
-            statusText.text = "Status: Not configured"
+        val phone = smsManager.getTrackerNumber()
+        trackerNumberText.text = phone
+        
+        if (phone.isEmpty()) {
+            statusText.text = "● Not Connected"
+            statusDot.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
         } else {
-            locationText.text = "Tracker: ${smsManager.getTrackerNumber()}"
-            statusText.text = "Status: Ready"
+            statusText.text = "● Connected"
+            statusDot.setBackgroundColor(ContextCompat.getColor(this, R.color.green))
+        }
+        
+        // Load last update time
+        val prefs = getSharedPreferences("tracker_prefs", MODE_PRIVATE)
+        val lastTime = prefs.getLong("last_location_time", 0)
+        if (lastTime > 0) {
+            val sdf = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
+            lastUpdateText.text = "Last update: ${sdf.format(Date(lastTime))}"
         }
     }
 
@@ -102,13 +130,16 @@ class MainActivity : AppCompatActivity() {
         }
         
         btnGetLocation.isEnabled = false
-        btnGetLocation.text = "Waiting..."
+        btnGetLocation.text = "Sending..."
         
         smsManager.getLocation { success, message, _ ->
             runOnUiThread {
                 btnGetLocation.isEnabled = true
                 btnGetLocation.text = "GET LOCATION"
                 Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                if (success) {
+                    lastUpdateText.text = "Last update: Just now"
+                }
             }
         }
     }
@@ -120,7 +151,7 @@ class MainActivity : AppCompatActivity() {
         }
         
         btnGetStatus.isEnabled = false
-        btnGetStatus.text = "Waiting..."
+        btnGetStatus.text = "Sending..."
         
         smsManager.getStatus { success, message, _ ->
             runOnUiThread {
@@ -145,10 +176,6 @@ class MainActivity : AppCompatActivity() {
                 smsManager.engineOn { success, message ->
                     runOnUiThread {
                         btnEngineOn.isEnabled = true
-                        if (success) {
-                            engineStatusText.text = "Engine: ON"
-                            engineStatusText.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.green))
-                        }
                         Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -171,16 +198,40 @@ class MainActivity : AppCompatActivity() {
                 smsManager.engineOff { success, message ->
                     runOnUiThread {
                         btnEngineOff.isEnabled = true
-                        if (success) {
-                            engineStatusText.text = "Engine: OFF"
-                            engineStatusText.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red))
-                        }
                         Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
             .setNegativeButton("No", null)
             .show()
+    }
+
+    private fun navigateToCar() {
+        val prefs = getSharedPreferences("tracker_prefs", MODE_PRIVATE)
+        
+        // Try to get last known location
+        var lat = prefs.getString("last_latitude", "") ?: ""
+        var lng = prefs.getString("last_longitude", "") ?: ""
+        
+        // If no location, use default (Kampala)
+        if (lat.isEmpty() || lng.isEmpty()) {
+            lat = prefs.getString("default_lat", "0.3476") ?: "0.3476"
+            lng = prefs.getString("default_lng", "32.5825") ?: "32.5825"
+        }
+        
+        // Open Google Maps for navigation
+        val gmmIntentUri = Uri.parse("google.navigation:q=$lat,$lng")
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        
+        if (mapIntent.resolveActivity(packageManager) != null) {
+            startActivity(mapIntent)
+        } else {
+            // Open in browser
+            val browserUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng")
+            val browserIntent = Intent(Intent.ACTION_VIEW, browserUri)
+            startActivity(browserIntent)
+        }
     }
 
     override fun onRequestPermissionsResult(
