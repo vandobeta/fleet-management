@@ -4,3 +4,9 @@ node_modules/
 .env
 .DS_Store
 
+tracker-app/
+*.iml
+.gradle/
+local.properties
+build/
+
