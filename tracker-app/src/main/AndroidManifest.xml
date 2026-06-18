@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
+    <application
+        android:allowBackup="true"
+        android:label="Tracker SMS"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TrackerApp">
+        
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.map.MapActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.commands.CommandsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false" />
+
+        <receiver
+            android:name=".utils.SmsReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+
+    </application>
+
+</manifest>
