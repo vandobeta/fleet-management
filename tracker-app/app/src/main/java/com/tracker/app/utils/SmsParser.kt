@@ -2,6 +2,7 @@ package com.tracker.app.utils
 
 import com.tracker.app.data.model.EngineState
 import com.tracker.app.data.model.LocationResponse
+import com.tracker.app.data.model.NetworkStatusResponse
 import com.tracker.app.data.model.RelayResponse
 import com.tracker.app.data.model.StatusResponse
 
@@ -62,6 +63,49 @@ object SmsParser {
     }
 
     /**
+     * Parse KIP# or network status response
+     * Example: <CKIP*T:185.213.2.30,32085*C:30/300*D:0.0.0.0,0*V:30/300*E:120.25.232.237,1234*LIP:120.76.67.69,4540>
+     */
+    fun parseNetworkStatusResponse(smsBody: String): NetworkStatusResponse? {
+        try {
+            // Parse T: server IP,port
+            val serverIp = extractValueWithPort(smsBody, "T") ?: ""
+            
+            // Parse C: battery percent (30/300 means 30%)
+            val batteryPercent = extractValue(smsBody, "C")?.split("/")?.firstOrNull()?.toIntOrNull() ?: 0
+            
+            // Parse V: external power
+            val externalPower = extractValue(smsBody, "V")?.split("/")?.firstOrNull()?.toIntOrNull() ?: 0
+            
+            // Parse E: external IP,port
+            val serverExternalIp = extractValueWithPort(smsBody, "E") ?: ""
+            
+            // Parse LIP: local IP,port
+            val localIp = extractValueWithPort(smsBody, "LIP") ?: ""
+            
+            // Parse D: device status
+            val deviceStatus = extractValue(smsBody, "D")?.split(",")?.firstOrNull()?.toIntOrNull() ?: 0
+            
+            return NetworkStatusResponse(
+                serverIp = serverIp,
+                batteryPercent = batteryPercent,
+                externalPower = externalPower,
+                serverExternalIp = serverExternalIp,
+                localIp = localIp,
+                deviceStatus = deviceStatus
+            )
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    private fun extractValueWithPort(response: String, key: String): String? {
+        val pattern = "$key:([^,*]+),(\\d+)".toRegex()
+        val match = pattern.find(response) ?: return null
+        return "${match.groupValues[1]}:${match.groupValues[2]}"
+    }
+
+    /**
      * Parse RELAY command response
      * RELAY,0# -> "supply fuel successfully"
      * RELAY,1# -> "cut off fuel successfully"
@@ -91,10 +135,11 @@ object SmsParser {
  * SMS Commands for Lynkworld LW2G-4C
  */
 object SmsCommands {
-    const val WHERE = "WHERE#"
-    const val PARAM = "PARAM#"
-    const val RELAY_ON = "RELAY,0#"      // Supply fuel (engine on)
-    const val RELAY_OFF = "RELAY,1#"     // Cut fuel (engine off)
+    const val WHERE = "WHERE#"           // Get location (Google Maps link)
+    const val PARAM = "PARAM#"           // Get status (battery, speed, ignition)
+    const val KIP = "KIP#"              // Get network info (IP, port, battery)
+    const val RELAY_ON = "RELAY,0#"    // Supply fuel (engine on)
+    const val RELAY_OFF = "RELAY,1#"   // Cut fuel (engine off)
     const val SET_APN = "APN,internet#" // Set APN
     
     fun buildCommand(command: String): String = command

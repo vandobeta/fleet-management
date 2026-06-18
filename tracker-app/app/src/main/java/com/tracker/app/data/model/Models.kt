@@ -25,6 +25,19 @@ data class StatusResponse(
 )
 
 /**
+ * Response from KIP# or network status command
+ * Example: <CKIP*T:185.213.2.30,32085*C:30/300*D:0.0.0.0,0*V:30/300*E:120.25.232.237,1234*LIP:120.76.67.69,4540>
+ */
+data class NetworkStatusResponse(
+    val serverIp: String,          // T: Server IP,port
+    val batteryPercent: Int,       // C: Battery percent
+    val externalPower: Int,        // V: External voltage (mV)
+    val serverExternalIp: String,   // E: External IP,port
+    val localIp: String,           // LIP: Local IP,port
+    val deviceStatus: Int         // D: Device status
+)
+
+/**
  * Response from RELAY commands
  * RELAY,0# -> "supply fuel successfully"
  * RELAY,1# -> "cut off fuel successfully"

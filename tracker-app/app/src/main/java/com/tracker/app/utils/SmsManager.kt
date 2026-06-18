@@ -8,6 +8,7 @@ import android.telephony.SmsManager
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.tracker.app.data.model.LocationResponse
+import com.tracker.app.data.model.NetworkStatusResponse
 import com.tracker.app.data.model.RelayResponse
 import com.tracker.app.data.model.StatusResponse
 
@@ -132,7 +133,16 @@ class SmsManager(private val context: Context) {
             }
             body.contains("*C:") && body.contains("*O:") -> {
                 val status = SmsParser.parseStatusResponse(body)
-                SmsResponse.Status(status)
+                if (status != null) {
+                    SmsResponse.Status(status)
+                } else {
+                    val networkStatus = SmsParser.parseNetworkStatusResponse(body)
+                    if (networkStatus != null) {
+                        SmsResponse.NetworkStatus(networkStatus)
+                    } else {
+                        SmsResponse.Unknown(body)
+                    }
+                }
             }
             body.contains("successfully") -> {
                 val relay = SmsParser.parseRelayResponse(body)
@@ -184,6 +194,7 @@ class SmsManager(private val context: Context) {
 sealed class SmsResponse {
     data class Location(val location: LocationResponse?) : SmsResponse()
     data class Status(val status: StatusResponse?) : SmsResponse()
+    data class NetworkStatus(val status: NetworkStatusResponse?) : SmsResponse()
     data class Relay(val relay: RelayResponse) : SmsResponse()
     data class Unknown(val raw: String) : SmsResponse()
 }
