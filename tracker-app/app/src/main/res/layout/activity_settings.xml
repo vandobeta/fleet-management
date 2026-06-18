@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tracker Phone Number"
+        android:textSize="14sp"
+        android:layout_marginTop="24dp" />
+
+    <EditText
+        android:id="@+id/phone_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="+1234567890"
+        android:inputType="phone"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/saved_number_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No tracker configured"
+        android:textSize="12sp"
+        android:textColor="#666"
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Tracker Number"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#27ae60" />
+
+    <Button
+        android:id="@+id/btn_clear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clear Tracker Number"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="#e74c3c" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SMS Commands Available:"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WHERE# - Get location (Google Maps link)\nPARAM# - Get status (battery, speed, ignition)\nRELAY,0# - Engine ON (supply fuel)\nRELAY,1# - Engine OFF (cut fuel)"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
